@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIBBEKODE — Lær V0 & Claude</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,600&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <!-- Stripe.js — bytt ut med din publiserbare nøkkel -->
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0c0b09;
+      --surface:     #131210;
+      --surface-2:   #1c1a16;
+      --text:        #ede5cc;
+      --muted:       #7a7060;
+      --dim:         #3a3830;
+      --gold:        #c9952e;
+      --gold-l:      #e8b84b;
+      --ember:       #d44f2b;
+      --teal:        #2ec4b6;
+      --border:      #201e18;
+      --border-m:    #2e2b22;
+
+      --display: 'Cormorant Garamond', serif;
+      --mono:    'JetBrains Mono', monospace;
+      --ui:      'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--ui);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Noise overlay */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.35;
+    }
+
+    /* ── NAV ─────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 1.5rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid transparent;
+      transition: background 0.35s, border-color 0.35s;
+    }
+    nav.scrolled {
+      background: rgba(12,11,9,0.94);
+      border-color: var(--border-m);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-family: var(--mono); font-size: 0.85rem;
+      letter-spacing: 0.18em; color: var(--text); text-decoration: none;
+    }
+    .logo span { color: var(--gold); }
+    .nav-btn {
+      font-family: var(--ui); font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--bg); background: var(--gold);
+      padding: 0.65rem 1.5rem; text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-btn:hover { background: var(--gold-l); transform: translateY(-1px); }
+
+    /* ── HERO ─────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      padding: 0 3rem;
+      display: flex; align-items: flex-end;
+      position: relative; overflow: hidden;
+    }
+    .hero-inner {
+      max-width: 1400px; margin: 0 auto; width: 100%;
+      padding-bottom: 8rem; padding-top: 14rem;
+    }
+    .eyebrow {
+      font-family: var(--mono); font-size: 0.65rem;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 2.5rem;
+      opacity: 0; transform: translateY(18px);
+      animation: fadeUp 0.7s 0.2s forwards;
+    }
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(4.5rem, 12vw, 11rem);
+      font-weight: 300; line-height: 0.9;
+      letter-spacing: -0.025em;
+      margin-bottom: 4rem;
+    }
+    .hero-title em { font-style: italic; color: var(--gold); }
+    .hero-line { display: block; overflow: hidden; }
+    .hero-line-inner {
+      display: block; opacity: 0; transform: translateY(105%);
+      animation: slideUp 0.85s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+    .hero-line:nth-child(1) .hero-line-inner { animation-delay: 0.3s; }
+    .hero-line:nth-child(2) .hero-line-inner { animation-delay: 0.44s; }
+    .hero-line:nth-child(3) .hero-line-inner { animation-delay: 0.58s; }
+    .hero-bottom {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; gap: 4rem;
+      opacity: 0; animation: fadeUp 0.7s 0.85s forwards;
+    }
+    .hero-desc {
+      max-width: 440px; font-size: 1rem;
+      color: var(--muted); font-weight: 300; line-height: 1.75;
+    }
+    .hero-desc strong { color: var(--text); font-weight: 500; }
+    .hero-cta { display: flex; gap: 1rem; align-items: center; flex-shrink: 0; }
+
+    /* large ghost letters */
+    .hero-ghost {
+      position: absolute; bottom: -3rem; right: -1rem;
+      font-family: var(--display); font-size: 38vw;
+      font-weight: 700; color: var(--text);
+      opacity: 0.04; line-height: 1;
+      pointer-events: none; user-select: none;
+    }
+
+    /* ── TICKER ──────────────────────────────────────── */
+    .ticker { background: var(--gold); padding: 0.75rem 0; overflow: hidden; }
+    .ticker-track {
+      display: inline-flex; gap: 2.5rem;
+      animation: scroll-left 22s linear infinite;
+    }
+    .ticker-item {
+      font-family: var(--mono); font-size: 0.62rem;
+      font-weight: 500; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--bg); flex-shrink: 0;
+    }
+
+    /* ── SHARED ──────────────────────────────────────── */
+    .wrap { max-width: 1400px; margin: 0 auto; padding: 8rem 3rem; }
+    .section-tag {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 4rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-tag::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border-m); max-width: 7rem;
+    }
+
+    /* ── FEATURES ─────────────────────────────────────── */
+    .features { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--border-m); }
+    .feat {
+      padding: 3rem; border-right: 1px solid var(--border-m);
+      transition: background 0.3s;
+    }
+    .feat:last-child { border-right: none; }
+    .feat:hover { background: var(--surface); }
+    .feat-num {
+      font-family: var(--mono); font-size: 0.58rem;
+      color: var(--dim); letter-spacing: 0.14em; margin-bottom: 1.75rem;
+    }
+    .feat-icon { width: 2rem; height: 2rem; color: var(--gold); margin-bottom: 1.5rem; }
+    .feat h3 {
+      font-family: var(--display); font-size: 1.55rem;
+      font-weight: 600; color: var(--text); margin-bottom: 0.75rem; line-height: 1.2;
+    }
+    .feat p { font-size: 0.87rem; color: var(--muted); font-weight: 300; line-height: 1.75; }
+
+    /* ── CURRICULUM ──────────────────────────────────── */
+    .curr-wrap { border-top: 1px solid var(--border-m); }
+    .curr-head {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6rem; align-items: end; margin-bottom: 5rem;
+    }
+    .curr-title {
+      font-family: var(--display);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 300; line-height: 0.98; letter-spacing: -0.02em;
+    }
+    .curr-title em { font-style: italic; color: var(--gold); }
+    .curr-desc {
+      font-size: 0.9rem; color: var(--muted);
+      font-weight: 300; line-height: 1.75; padding-bottom: 0.5rem;
+    }
+    .modules { list-style: none; border-top: 1px solid var(--border-m); }
+    .module {
+      display: grid; grid-template-columns: 4.5rem 1fr auto;
+      align-items: center; gap: 2rem;
+      padding: 1.75rem 0; border-bottom: 1px solid var(--border);
+      transition: padding-left 0.3s;
+    }
+    .module:hover { padding-left: 0.5rem; }
+    .module:hover .mod-n { color: var(--gold); }
+    .mod-n {
+      font-family: var(--mono); font-size: 0.62rem;
+      color: var(--dim); letter-spacing: 0.12em; transition: color 0.3s;
+    }
+    .mod-name {
+      font-family: var(--display); font-size: 1.2rem;
+      font-weight: 500; color: var(--text);
+    }
+    .mod-tag {
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--teal);
+      background: rgba(46,196,182,0.07);
+      border: 1px solid rgba(46,196,182,0.18);
+      padding: 0.3rem 0.75rem;
+    }
+
+    /* ── PRICING ──────────────────────────────────────── */
+    #pris { max-width: 1400px; margin: 0 auto; padding: 0 3rem 8rem; }
+    .price-box { background: var(--surface); border: 1px solid var(--border-m); }
+    .price-head { padding: 4rem; border-bottom: 1px solid var(--border-m); }
+    .price-head h2 {
+      font-family: var(--display);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 300; line-height: 1.05;
+      letter-spacing: -0.02em; margin-bottom: 0.75rem;
+    }
+    .price-head h2 em { font-style: italic; color: var(--gold); }
+    .price-head p { font-size: 0.88rem; color: var(--muted); font-weight: 300; }
+    .price-cards { display: grid; grid-template-columns: 1fr 1fr; }
+    .price-card {
+      padding: 4rem; border-right: 1px solid var(--border-m);
+      position: relative;
+    }
+    .price-card:last-child { border-right: none; }
+    .price-card.featured { background: var(--surface-2); }
+    .badge {
+      position: absolute; top: -1px; right: 3rem;
+      background: var(--gold); color: var(--bg);
+      font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 0.35rem 0.8rem;
+    }
+    .price-tier {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.5rem;
+    }
+    .price-amount {
+      font-family: var(--display); font-size: 4.5rem;
+      font-weight: 600; color: var(--text);
+      line-height: 1; margin-bottom: 0.4rem;
+    }
+    .price-amount sup { font-size: 1.5rem; vertical-align: top; margin-top: 0.6rem; color: var(--gold); }
+    .price-period { font-size: 0.8rem; color: var(--muted); margin-bottom: 2.5rem; }
+    .price-list { list-style: none; margin-bottom: 3rem; }
+    .price-list li {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      font-size: 0.875rem; color: var(--muted);
+      margin-bottom: 0.85rem; font-weight: 300;
+    }
+    .price-list li::before { content: '→'; color: var(--gold); flex-shrink: 0; margin-top: 0.05rem; }
+
+    /* Buttons */
+    .btn {
+      display: inline-block; width: 100%; padding: 1.1rem 2rem;
+      font-family: var(--ui); font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      text-align: center; border: none; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+    .btn-gold { background: var(--gold); color: var(--bg); }
+    .btn-gold:hover { background: var(--gold-l); transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border-m);
+    }
+    .btn-outline:hover { border-color: var(--muted); color: var(--text); transform: translateY(-1px); }
+
+    /* ── MODAL ───────────────────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0; z-index: 600;
+      background: rgba(12,11,9,0.9);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(10px);
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border-m);
+      width: 100%; max-width: 510px; padding: 3rem; position: relative;
+      transform: translateY(22px); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .overlay.open .modal { transform: translateY(0); }
+    .modal-x {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 1.2rem; line-height: 1;
+      transition: color 0.2s; padding: 0.25rem;
+    }
+    .modal-x:hover { color: var(--text); }
+    .modal h2 {
+      font-family: var(--display); font-size: 2rem;
+      font-weight: 600; margin-bottom: 0.5rem;
+    }
+    .modal-sub { font-size: 0.83rem; color: var(--muted); font-weight: 300; margin-bottom: 2.5rem; }
+
+    .field { margin-bottom: 1.4rem; }
+    .field label {
+      display: block; font-family: var(--mono); font-size: 0.58rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.55rem;
+    }
+    .field input {
+      width: 100%; padding: 0.875rem 1rem;
+      background: var(--surface-2); border: 1px solid var(--border-m);
+      color: var(--text); font-family: var(--ui); font-size: 0.9rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--gold); }
+    .field input::placeholder { color: var(--dim); }
+
+    /* Stripe card mount */
+    #card-element {
+      padding: 0.9rem 1rem;
+      background: var(--surface-2); border: 1px solid var(--border-m);
+      transition: border-color 0.2s;
+    }
+    #card-element.StripeElement--focus { border-color: var(--gold); }
+
+    #card-errors { font-size: 0.78rem; color: var(--ember); min-height: 1.2rem; margin-top: 0.4rem; }
+
+    .amount-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.9rem 1rem;
+      background: rgba(201,149,46,0.05);
+      border: 1px solid rgba(201,149,46,0.14);
+      margin-bottom: 1.5rem;
+    }
+    .amount-label { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .amount-val { font-family: var(--display); font-size: 1.5rem; font-weight: 600; color: var(--gold); }
+
+    .stripe-trust {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.45rem; margin-top: 0.9rem;
+    }
+    .stripe-trust span { font-size: 0.68rem; color: var(--dim); }
+    .stripe-trust svg { width: 1.4rem; height: 1.4rem; opacity: 0.4; }
+
+    .form-divider {
+      display: flex; align-items: center; gap: 1rem; margin: 1.4rem 0;
+    }
+    .form-divider::before, .form-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border-m);
+    }
+    .form-divider span { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+
+    /* Success */
+    .modal-success { display: none; text-align: center; padding: 1rem 0; }
+    .modal-success.show { display: block; }
+    .modal-form.hide { display: none; }
+    .success-ring {
+      width: 4rem; height: 4rem; border-radius: 50%;
+      border: 1.5px solid var(--gold);
+      background: rgba(201,149,46,0.08);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.75rem; color: var(--gold); font-size: 1.4rem;
+    }
+    .success-ring svg { width: 1.5rem; height: 1.5rem; }
+    .modal-success h3 {
+      font-family: var(--display); font-size: 2rem;
+      font-weight: 600; margin-bottom: 0.75rem;
+    }
+    .modal-success p { font-size: 0.875rem; color: var(--muted); font-weight: 300; line-height: 1.7; }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border-m);
+      padding: 3rem; max-width: 1400px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .foot-logo { font-family: var(--mono); font-size: 0.8rem; letter-spacing: 0.16em; color: var(--muted); }
+    .foot-logo span { color: var(--gold); }
+    .foot-copy { font-size: 0.72rem; color: var(--dim); font-weight: 300; }
+
+    /* ── ANIMATIONS ─────────────────────────────────── */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scroll-left {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(36px);
+      transition: opacity 0.75s, transform 0.75s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── COURSE CARDS ───────────────────────────────── */
+    .courses-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      border: 1px solid var(--border-m);
+    }
+    .course-card {
+      padding: 4rem; position: relative;
+      border-right: 1px solid var(--border-m);
+      display: flex; flex-direction: column;
+      transition: background 0.3s;
+    }
+    .course-card:last-child { border-right: none; }
+    .course-card:hover { background: var(--surface); }
+    .course-stripe {
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .course-card.v0 .course-stripe { background: var(--teal); }
+    .course-card.cl .course-stripe { background: var(--gold); }
+    .course-label {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.75rem; margin-top: 0.5rem;
+    }
+    .course-title {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+      font-weight: 300; line-height: 1.0;
+      letter-spacing: -0.02em; margin-bottom: 1.25rem;
+    }
+    .course-card.v0 .course-title em { font-style: italic; color: var(--teal); }
+    .course-card.cl  .course-title em { font-style: italic; color: var(--gold); }
+    .course-desc {
+      font-size: 0.88rem; color: var(--muted);
+      font-weight: 300; line-height: 1.75; margin-bottom: 2rem;
+    }
+    .course-chips {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem;
+    }
+    .chip {
+      font-family: var(--mono); font-size: 0.56rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.3rem 0.7rem; border: 1px solid var(--border-m); color: var(--muted);
+    }
+    .chip.hl { border-color: rgba(46,196,182,0.25); color: var(--teal); background: rgba(46,196,182,0.05); }
+    .chip.hg { border-color: rgba(201,149,46,0.25); color: var(--gold); background: rgba(201,149,46,0.05); }
+    .course-points { list-style: none; flex: 1; margin-bottom: 2.5rem; }
+    .course-points li {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      font-size: 0.85rem; color: var(--muted);
+      margin-bottom: 0.7rem; font-weight: 300;
+    }
+    .course-card.v0 .course-points li::before { content: '→'; color: var(--teal); flex-shrink: 0; }
+    .course-card.cl  .course-points li::before { content: '→'; color: var(--gold); flex-shrink: 0; }
+    .course-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1.5rem; padding-top: 2rem;
+      border-top: 1px solid var(--border); margin-top: auto;
+    }
+    .course-price {
+      font-family: var(--display); font-size: 2.6rem;
+      font-weight: 600; color: var(--text); line-height: 1;
+    }
+    .course-price sup {
+      font-size: 1rem; vertical-align: top;
+      margin-top: 0.45rem; color: var(--muted);
+    }
+    .btn-teal { background: rgba(46,196,182,0.12); color: var(--teal); border: 1px solid rgba(46,196,182,0.3); }
+    .btn-teal:hover { background: rgba(46,196,182,0.22); color: #4de8d8; transform: translateY(-1px); }
+
+    /* ── FORMAT STRIP ────────────────────────────────── */
+    .format-strip {
+      border: 1px solid var(--border-m); border-top: none;
+      display: grid; grid-template-columns: repeat(3,1fr);
+      background: var(--surface);
+    }
+    .format-item {
+      padding: 2.25rem 3rem; display: flex; gap: 1.25rem;
+      align-items: flex-start; border-right: 1px solid var(--border-m);
+    }
+    .format-item:last-child { border-right: none; }
+    .fi-icon { width: 1.6rem; height: 1.6rem; color: var(--gold); flex-shrink: 0; margin-top: 0.1rem; }
+    .format-item strong { display: block; font-size: 0.88rem; font-weight: 500; color: var(--text); margin-bottom: 0.3rem; }
+    .format-item p { font-size: 0.78rem; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+    /* ── CURRICULUM TABS ─────────────────────────────── */
+    .curr-tabs {
+      display: flex; border-bottom: 1px solid var(--border-m); margin-bottom: 0;
+    }
+    .curr-tab {
+      font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.16em;
+      text-transform: uppercase; padding: 1.1rem 2rem;
+      background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--muted); cursor: pointer; margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .curr-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .curr-tab:hover:not(.active) { color: var(--text); }
+    .curr-content { display: none; }
+    .curr-content.active { display: block; }
+
+    /* ── BEDRIFT ─────────────────────────────────────── */
+    .bedrift-box {
+      background: var(--surface); border: 1px solid var(--border-m);
+      padding: 4rem; display: flex;
+      align-items: center; justify-content: space-between; gap: 4rem;
+    }
+    .bedrift-box h2 {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-weight: 300; line-height: 1.05; letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    .bedrift-box h2 em { font-style: italic; color: var(--gold); }
+    .bedrift-box p { font-size: 0.88rem; color: var(--muted); font-weight: 300; line-height: 1.7; max-width: 420px; }
+    .bedrift-actions { display: flex; flex-direction: column; gap: 0.75rem; flex-shrink: 0; min-width: 220px; }
+    .btn-ghost {
+      display: inline-block; width: 100%; padding: 1.1rem 2rem;
+      font-family: var(--ui); font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      text-align: center; cursor: pointer; text-decoration: none;
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border-m);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+    /* ── RESPONSIVE ─────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 1.25rem 1.5rem; }
+      .hero { padding: 0 1.5rem; }
+      .hero-bottom { flex-direction: column; align-items: flex-start; gap: 2rem; }
+      .wrap { padding: 5rem 1.5rem; }
+      #pris { padding: 0 1.5rem 5rem; }
+      .courses-grid { grid-template-columns: 1fr; }
+      .course-card { border-right: none; border-bottom: 1px solid var(--border-m); }
+      .format-strip { grid-template-columns: 1fr; }
+      .format-item { border-right: none; border-bottom: 1px solid var(--border-m); }
+      .bedrift-box { flex-direction: column; align-items: flex-start; gap: 2rem; padding: 2rem; }
+      .bedrift-actions { min-width: 0; width: 100%; }
+      .curr-head { grid-template-columns: 1fr; gap: 2rem; }
+      .module { grid-template-columns: 3.5rem 1fr; }
+      .mod-tag { display: none; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+      .modal { padding: 2rem; margin: 1rem; max-height: 90vh; overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAV ════════════════════════════════════════════ -->
+<nav id="nav">
+  <a href="#" class="logo">VIBBEKODE<span>.</span></a>
+  <a href="#kurs" class="nav-btn">Se kursene</a>
+</nav>
+
+<!-- ═══ HERO ═══════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">To live kurs · Zoom & bedriftsbesøk · 2025</p>
+
+    <h1 class="hero-title">
+      <span class="hero-line"><span class="hero-line-inner">Bygg alt</span></span>
+      <span class="hero-line"><span class="hero-line-inner">du kan</span></span>
+      <span class="hero-line"><span class="hero-line-inner"><em>tenke.</em></span></span>
+    </h1>
+
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        To live kurs via Zoom — ett for <strong>V0 av Vercel</strong> og ett for <strong>Claude av Anthropic</strong>. Små grupper, praktisk læring, og for bedrifter: vi kommer til dere.
+      </p>
+      <div class="hero-cta">
+        <a href="#kurs" class="btn btn-gold" style="width:auto;padding:1.15rem 2.5rem;">
+          Se kursene →
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-ghost" aria-hidden="true">AI</div>
+</div>
+
+<!-- ═══ TICKER ══════════════════════════════════════════ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span class="ticker-item">V0 by Vercel</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Claude Sonnet</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Prompt Engineering</span><span class="ticker-item">·</span>
+    <span class="ticker-item">React Components</span><span class="ticker-item">·</span>
+    <span class="ticker-item">AI-assistert design</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Vercel Deploy</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Next.js</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Vibbekoding</span><span class="ticker-item">·</span>
+    <!-- dupliser for sømløs loop -->
+    <span class="ticker-item">V0 by Vercel</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Claude Sonnet</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Prompt Engineering</span><span class="ticker-item">·</span>
+    <span class="ticker-item">React Components</span><span class="ticker-item">·</span>
+    <span class="ticker-item">AI-assistert design</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Vercel Deploy</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Next.js</span><span class="ticker-item">·</span>
+    <span class="ticker-item">Vibbekoding</span><span class="ticker-item">·</span>
+  </div>
+</div>
+
+<!-- ═══ KURSENE ═══════════════════════════════════════════ -->
+<div class="wrap" id="kurs">
+  <p class="section-tag reveal">01 — To kurs, ett mål</p>
+
+  <div class="courses-grid reveal">
+
+    <!-- V0 -->
+    <div class="course-card v0">
+      <div class="course-stripe"></div>
+      <p class="course-label">Kurs 01 — V0 by Vercel</p>
+      <h2 class="course-title">Design og bygg<br>med <em>tekst</em></h2>
+      <p class="course-desc">
+        Lær å bruke Vercels V0 til å generere profesjonelle nettsider og React-komponenter bare ved å beskrive hva du vil. Null kodeforsvar nødvendig — du tenker, V0 bygger.
+      </p>
+      <div class="course-chips">
+        <span class="chip hl">Live på Zoom</span>
+        <span class="chip">Halvdags · 4 timer</span>
+        <span class="chip">Maks 12 deltakere</span>
+        <span class="chip">Nybegynnervennlig</span>
+      </div>
+      <ul class="course-points">
+        <li>Hva er V0 og hvordan fungerer det?</li>
+        <li>Generere og iterere på design med prompts</li>
+        <li>Eksportere og tilpasse React-kode</li>
+        <li>Koble V0 til Vercel og publisere live</li>
+        <li>Bygge en ferdig landingsside fra scratch</li>
+      </ul>
+      <div class="course-footer">
+        <span class="course-price"><sup>kr</sup>1 490</span>
+        <button class="btn btn-teal" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','V0-kurset','1 490')">
+          Meld deg på →
+        </button>
+      </div>
+    </div>
+
+    <!-- CLAUDE -->
+    <div class="course-card cl">
+      <div class="course-stripe"></div>
+      <p class="course-label">Kurs 02 — Claude av Anthropic</p>
+      <h2 class="course-title">Kode og tenk<br>med <em>AI</em></h2>
+      <p class="course-desc">
+        Mestre Claude som kodepartner, problemløser og kreativ sparringspartner. Lær presis prompting, feilsøking og hvordan du integrerer AI i din daglige arbeidsflyt.
+      </p>
+      <div class="course-chips">
+        <span class="chip hg">Live på Zoom</span>
+        <span class="chip">Halvdags · 4 timer</span>
+        <span class="chip">Maks 12 deltakere</span>
+        <span class="chip">Noe erfaring nyttig</span>
+      </div>
+      <ul class="course-points">
+        <li>Forstå hva Claude faktisk er god på</li>
+        <li>Prompt engineering: struktur og teknikker</li>
+        <li>Kode, feilsøk og refaktorer med Claude</li>
+        <li>Bygge egne arbeidsflyter og systemprompts</li>
+        <li>Avanserte bruksområder og API-muligheter</li>
+      </ul>
+      <div class="course-footer">
+        <span class="course-price"><sup>kr</sup>1 490</span>
+        <button class="btn btn-gold" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','Claude-kurset','1 490')">
+          Meld deg på →
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /courses-grid -->
+
+  <!-- FORMAT STRIP -->
+  <div class="format-strip reveal">
+    <div class="format-item">
+      <svg class="fi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/>
+      </svg>
+      <div>
+        <strong>Live på Zoom</strong>
+        <p>Alle kurs holdes live med instruktør. Stille spørsmål, få svar i sanntid og lær sammen med andre.</p>
+      </div>
+    </div>
+    <div class="format-item">
+      <svg class="fi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <div>
+        <strong>Vi kommer til dere</strong>
+        <p>Er dere et firma? Vi reiser dit dere er og holder kurset på stedet. Skreddersydd innhold etter behov.</p>
+      </div>
+    </div>
+    <div class="format-item">
+      <svg class="fi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+      </svg>
+      <div>
+        <strong>Små grupper</strong>
+        <p>Maks 12 deltakere per sesjon. Alle får tid og oppmerksomhet — ikke bare et forelesningslysark.</p>
+      </div>
+    </div>
+  </div><!-- /format-strip -->
+
+</div><!-- /wrap -->
+
+<!-- ═══ INNHOLD ══════════════════════════════════════════ -->
+<div class="wrap curr-wrap" style="padding-top:0" id="innhold">
+  <div class="curr-head reveal">
+    <h2 class="curr-title">Hva vi<br><em>går gjennom</em></h2>
+    <p class="curr-desc">
+      Hvert kurs er 4 timer live på Zoom. Praktisk, hands-on og tilpasset deltakernes nivå. Ingen fluff — bare nyttige ting du bruker med én gang.
+    </p>
+  </div>
+
+  <div class="reveal">
+    <div class="curr-tabs">
+      <button class="curr-tab active" onclick="switchTab('v0')">V0-kurset</button>
+      <button class="curr-tab" onclick="switchTab('claude')">Claude-kurset</button>
+    </div>
+
+    <!-- V0 MODULES -->
+    <div class="curr-content active" id="curr-v0">
+      <ul class="modules">
+        <li class="module">
+          <span class="mod-n">DEL 01</span>
+          <span class="mod-name">Introduksjon: Hva er V0?</span>
+          <span class="mod-tag">Grunnlag</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 02</span>
+          <span class="mod-name">Prompting for design — teknikk og struktur</span>
+          <span class="mod-tag">Kjerne</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 03</span>
+          <span class="mod-name">Bygge komponenter og sider i V0</span>
+          <span class="mod-tag">Praktisk</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 04</span>
+          <span class="mod-name">Eksportere og tilpasse koden</span>
+          <span class="mod-tag">Kode</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 05</span>
+          <span class="mod-name">Deploy til Vercel — fra kode til live nettside</span>
+          <span class="mod-tag">Deploy</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 06</span>
+          <span class="mod-name">Live prosjekt: Bygg og publiser din side</span>
+          <span class="mod-tag">Prosjekt</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- CLAUDE MODULES -->
+    <div class="curr-content" id="curr-claude">
+      <ul class="modules">
+        <li class="module">
+          <span class="mod-n">DEL 01</span>
+          <span class="mod-name">Forstå Claude — styrker og begrensninger</span>
+          <span class="mod-tag">Grunnlag</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 02</span>
+          <span class="mod-name">Prompt Engineering: struktur som gir resultater</span>
+          <span class="mod-tag">Kjerne</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 03</span>
+          <span class="mod-name">Kode og feilsøk med Claude som pair programmer</span>
+          <span class="mod-tag">Koding</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 04</span>
+          <span class="mod-name">Arbeidsflyter — systemprompts og gjenbrukbare maler</span>
+          <span class="mod-tag">Flyt</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 05</span>
+          <span class="mod-name">Claude i praksis — dokumenter, analyser, ideer</span>
+          <span class="mod-tag">Praktisk</span>
+        </li>
+        <li class="module">
+          <span class="mod-n">DEL 06</span>
+          <span class="mod-name">Avansert: API-bruk og egne Claude-integrasjoner</span>
+          <span class="mod-tag">Avansert</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BEDRIFT ═══════════════════════════════════════════ -->
+<section id="pris">
+  <div class="bedrift-box reveal">
+    <div>
+      <p class="section-tag" style="margin-bottom:1.5rem">Bedrift</p>
+      <h2>Kurs for<br><em>hele teamet</em></h2>
+      <p style="margin-top:1rem">
+        Jobber dere i et firma og ønsker å løfte teamets AI-kompetanse? Vi kommer til dere og holder kurset på stedet — tilpasset deres bransje, nivå og mål. Begge kursene kan kombineres til en heldagsworkshop.
+      </p>
+    </div>
+    <div class="bedrift-actions">
+      <a href="mailto:hei@vibbekode.no" class="btn btn-gold">
+        Ta kontakt
+      </a>
+      <a href="#kurs" class="btn-ghost">
+        Se individuelle kurs
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══════════════════════════════════════════ -->
+<footer>
+  <span class="foot-logo">VIBBEKODE<span>.</span></span>
+  <span class="foot-copy">© 2025 Vibbekode. Alle rettigheter forbeholdt.</span>
+</footer>
+
+<!-- ═══ MODAL ════════════════════════════════════════════ -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()" aria-label="Lukk">✕</button>
+
+    <!-- FORM STATE -->
+    <div class="modal-form" id="modal-form">
+      <h2 id="modal-title">Meld deg på</h2>
+      <p class="modal-sub" id="modal-sub">Fyll inn e-posten din for å sikre plassen din.</p>
+
+      <div class="field">
+        <label for="email-input">E-postadresse</label>
+        <input type="email" id="email-input" placeholder="du@eksempel.no" required />
+      </div>
+
+      <!-- BETALT: Stripe-felt -->
+      <div id="stripe-section" style="display:none">
+        <div class="amount-row">
+          <span class="amount-label">Totalbeløp</span>
+          <span class="amount-val" id="modal-amount-val">kr 1 490</span>
+        </div>
+        <div class="field">
+          <label>Kortinformasjon</label>
+          <div id="card-element"></div>
+          <div id="card-errors" role="alert"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-gold" id="submit-btn" onclick="handleSubmit()" style="margin-top:0.5rem">
+        <span id="btn-text">Bekreft plass</span>
+      </button>
+
+      <div class="stripe-trust" id="stripe-badge" style="display:none">
+        <svg viewBox="0 0 60 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 11.5C4 8.46 6.46 6 9.5 6h41C53.54 6 56 8.46 56 11.5v2C56 16.54 53.54 19 50.5 19h-41C6.46 19 4 16.54 4 13.5v-2z" fill="#6772E5" opacity="0.15"/>
+          <text x="30" y="15" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#6772E5" opacity="0.7">stripe</text>
+        </svg>
+        <span>Sikker betaling via Stripe</span>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="modal-success" id="modal-success">
+      <div class="success-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h3 id="success-title">Du er med!</h3>
+      <p id="success-msg">Vi har sendt deg en bekreftelses-e-post. Gleder oss til å se deg på kurset.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ══════════════════════════════════════════ -->
+<script>
+  /* ── Nav scroll ── */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 30);
+  });
+
+  /* ── Scroll reveal ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── Curriculum tabs ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.curr-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.curr-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.curr-tab[onclick*="'${tab}'"]`).classList.add('active');
+    document.getElementById(`curr-${tab}`).classList.add('active');
+  }
+
+  /* ── Modal state ── */
+  let currentMode = 'free'; // 'free' | 'paid'
+  let currentPrice = '1 490';
+  let stripe, cardElement;
+
+  /* ─────────────────────────────────────────────────────
+     STRIPE SETUP
+     Bytt ut 'pk_test_XXXX...' med din publiserbare Stripe-nøkkel
+     fra https://dashboard.stripe.com/apikeys
+  ──────────────────────────────────────────────────────── */
+  const STRIPE_PK = 'pk_test_LEGG_TIL_DIN_NØKKEL_HER';
+
+  function initStripe() {
+    if (stripe) return; // allerede initialisert
+    try {
+      stripe = Stripe(STRIPE_PK);
+      const elements = stripe.elements({
+        appearance: {
+          theme: 'night',
+          variables: {
+            colorBackground: '#1c1a16',
+            colorText: '#ede5cc',
+            colorDanger: '#d44f2b',
+            fontFamily: 'DM Sans, sans-serif',
+            borderRadius: '0px',
+            colorPrimary: '#c9952e',
+          }
+        }
+      });
+      cardElement = elements.create('card', {
+        style: {
+          base: {
+            color: '#ede5cc',
+            fontFamily: '"DM Sans", sans-serif',
+            fontSize: '15px',
+            '::placeholder': { color: '#3a3830' }
+          },
+          invalid: { color: '#d44f2b' }
+        }
+      });
+      cardElement.mount('#card-element');
+      cardElement.on('change', ({ error }) => {
+        document.getElementById('card-errors').textContent = error ? error.message : '';
+      });
+    } catch(e) {
+      console.warn('Stripe ikke initialisert — legg til din publiserbare nøkkel.');
+    }
+  }
+
+  function openModal(mode, course, price) {
+    currentMode = mode;
+    currentPrice = price || '1 490';
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('modal-form').classList.remove('hide');
+    document.getElementById('modal-success').classList.remove('show');
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('email-input').value = '';
+    document.body.style.overflow = 'hidden';
+
+    if (mode === 'paid') {
+      document.getElementById('modal-title').textContent = course || 'Meld deg på';
+      document.getElementById('modal-sub').textContent = 'Live Zoom-kurs · 4 timer · Maks 12 deltakere. Sikker betaling via Stripe.';
+      document.getElementById('stripe-section').style.display = 'block';
+      document.getElementById('stripe-badge').style.display = 'flex';
+      document.getElementById('modal-amount-val').textContent = `kr ${currentPrice}`;
+      document.getElementById('btn-text').textContent = `Betal kr ${currentPrice}`;
+      initStripe();
+    } else {
+      document.getElementById('modal-title').textContent = 'Venteliste';
+      document.getElementById('modal-sub').textContent = 'Vi sender deg en e-post så snart nye datoer annonseres. Helt gratis.';
+      document.getElementById('stripe-section').style.display = 'none';
+      document.getElementById('stripe-badge').style.display = 'none';
+      document.getElementById('btn-text').textContent = 'Bekreft plass';
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Lukk ved klikk utenfor modal
+  document.getElementById('overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  async function handleSubmit() {
+    const email = document.getElementById('email-input').value.trim();
+    const btn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+
+    if (!email || !email.includes('@')) {
+      document.getElementById('email-input').focus();
+      document.getElementById('email-input').style.borderColor = 'var(--ember)';
+      setTimeout(() => { document.getElementById('email-input').style.borderColor = ''; }, 1500);
+      return;
+    }
+
+    btn.disabled = true;
+    btnText.textContent = 'Behandler…';
+
+    if (currentMode === 'paid') {
+      /* ── Stripe betalingsflyt ── */
+      if (!stripe || !cardElement) {
+        // Demo-modus: simuler suksess hvis Stripe ikke er satt opp
+        await fakeDelay(1200);
+        showSuccess(true);
+        return;
+      }
+
+      const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: { email }
+      });
+
+      if (error) {
+        document.getElementById('card-errors').textContent = error.message;
+        btn.disabled = false;
+        btnText.textContent = `Betal kr ${currentPrice}`;
+        return;
+      }
+
+      /* ─────────────────────────────────────────────────
+         Send paymentMethod.id og email til din backend her.
+         Eksempel:
+         await fetch('/api/checkout', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ paymentMethodId: paymentMethod.id, email })
+         });
+      ──────────────────────────────────────────────────── */
+      console.log('PaymentMethod opprettet:', paymentMethod.id, 'E-post:', email);
+      await fakeDelay(800);
+      showSuccess(true);
+
+    } else {
+      /* ── Venteliste ── */
+      /* Send email til din backend eller e-postleverandør her */
+      console.log('Venteliste-registrering:', email);
+      await fakeDelay(900);
+      showSuccess(false);
+    }
+  }
+
+  function showSuccess(isPaid) {
+    document.getElementById('modal-form').classList.add('hide');
+    const s = document.getElementById('modal-success');
+    s.classList.add('show');
+    if (isPaid) {
+      document.getElementById('success-title').textContent = 'Betaling bekreftet!';
+      document.getElementById('success-msg').textContent =
+        'Velkommen til Vibbekode! Du har nå full tilgang. Sjekk e-posten din for neste steg.';
+    } else {
+      document.getElementById('success-title').textContent = 'Du er på lista!';
+      document.getElementById('success-msg').textContent =
+        'Vi sender deg en e-post så snart kurset åpner. Gleder oss til å ha deg med!';
+    }
+  }
+
+  function fakeDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+</script>
+</body>
+</html>

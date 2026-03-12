@@ -14,18 +14,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #0c0b09;
-      --surface:     #131210;
-      --surface-2:   #1c1a16;
-      --text:        #ede5cc;
-      --muted:       #7a7060;
-      --dim:         #3a3830;
-      --gold:        #c9952e;
-      --gold-l:      #e8b84b;
-      --ember:       #d44f2b;
-      --teal:        #2ec4b6;
-      --border:      #201e18;
-      --border-m:    #2e2b22;
+      --bg:          #f8f5f0;
+      --surface:     #ffffff;
+      --surface-2:   #eeebe5;
+      --text:        #1a1612;
+      --muted:       #706a62;
+      --dim:         #c2bcb3;
+      --gold:        #e8620c;
+      --gold-l:      #f07920;
+      --ember:       #e83020;
+      --teal:        #00c4b4;
+      --border:      #e4dfd7;
+      --border-m:    #d6d0c6;
 
       --display: 'Cormorant Garamond', serif;
       --mono:    'JetBrains Mono', monospace;
@@ -48,7 +48,7 @@
       content: '';
       position: fixed; inset: 0;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 9999; opacity: 0.35;
+      pointer-events: none; z-index: 9999; opacity: 0.12;
     }
 
     /* ── NAV ─────────────────────────────────────────── */
@@ -60,7 +60,7 @@
       transition: background 0.35s, border-color 0.35s;
     }
     nav.scrolled {
-      background: rgba(12,11,9,0.94);
+      background: rgba(248,245,240,0.95);
       border-color: var(--border-m);
       backdrop-filter: blur(12px);
     }
@@ -129,7 +129,7 @@
       position: absolute; bottom: -3rem; right: -1rem;
       font-family: var(--display); font-size: 38vw;
       font-weight: 700; color: var(--text);
-      opacity: 0.04; line-height: 1;
+      opacity: 0.06; line-height: 1;
       pointer-events: none; user-select: none;
     }
 
@@ -285,7 +285,7 @@
     /* ── MODAL ───────────────────────────────────────── */
     .overlay {
       position: fixed; inset: 0; z-index: 600;
-      background: rgba(12,11,9,0.9);
+      background: rgba(26,22,18,0.85);
       display: flex; align-items: center; justify-content: center;
       opacity: 0; pointer-events: none;
       transition: opacity 0.3s;
@@ -533,6 +533,19 @@
     }
     .btn-ghost:hover { color: var(--text); border-color: var(--text); }
 
+    /* ── INSTRUCTOR PHOTO ────────────────────────────── */
+    .instructor-row {
+      display: flex; align-items: center; gap: 0.85rem;
+      margin-top: 1.5rem;
+    }
+    .instructor-photo {
+      width: 48px; height: 48px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--gold); flex-shrink: 0;
+    }
+    .instructor-meta { font-size: 0.78rem; color: var(--muted); font-weight: 300; line-height: 1.4; }
+    .instructor-meta strong { display: block; color: var(--text); font-weight: 500; font-size: 0.82rem; }
+
     /* ── RESPONSIVE ─────────────────────────────────── */
     @media (max-width: 900px) {
       nav { padding: 1.25rem 1.5rem; }
@@ -574,9 +587,18 @@
     </h1>
 
     <div class="hero-bottom">
-      <p class="hero-desc">
-        To live kurs via Zoom — ett for <strong>V0 av Vercel</strong> og ett for <strong>Claude av Anthropic</strong>. Små grupper, praktisk læring, og for bedrifter: vi kommer til dere.
-      </p>
+      <div>
+        <p class="hero-desc">
+          To live kurs via Zoom — ett for <strong>V0 av Vercel</strong> og ett for <strong>Claude av Anthropic</strong>. Små grupper, praktisk læring, og for bedrifter: vi kommer til dere.
+        </p>
+        <div class="instructor-row">
+          <img src="annikenhero.JPG" alt="Anniken Lundaas" class="instructor-photo">
+          <div class="instructor-meta">
+            <strong>Anniken Lundaas</strong>
+            Instruktør & grunnlegger
+          </div>
+        </div>
+      </div>
       <div class="hero-cta">
         <a href="#kurs" class="btn btn-gold" style="width:auto;padding:1.15rem 2.5rem;">
           Se kursene →
@@ -626,7 +648,7 @@
       </p>
       <div class="course-chips">
         <span class="chip hl">Live på Zoom</span>
-        <span class="chip">Halvdags · 4 timer</span>
+        <span class="chip">Halvdags · 2 timer</span>
         <span class="chip">Maks 12 deltakere</span>
         <span class="chip">Nybegynnervennlig</span>
       </div>
@@ -655,7 +677,7 @@
       </p>
       <div class="course-chips">
         <span class="chip hg">Live på Zoom</span>
-        <span class="chip">Halvdags · 4 timer</span>
+        <span class="chip">Halvdags · 2 timer</span>
         <span class="chip">Maks 12 deltakere</span>
         <span class="chip">Noe erfaring nyttig</span>
       </div>
@@ -717,7 +739,7 @@
   <div class="curr-head reveal">
     <h2 class="curr-title">Hva vi<br><em>går gjennom</em></h2>
     <p class="curr-desc">
-      Hvert kurs er 4 timer live på Zoom. Praktisk, hands-on og tilpasset deltakernes nivå. Ingen fluff — bare nyttige ting du bruker med én gang.
+      Hvert kurs er 2 timer live på Zoom. Praktisk, hands-on og tilpasset deltakernes nivå. Ingen fluff — bare nyttige ting du bruker med én gang.
     </p>
   </div>
 
@@ -965,7 +987,7 @@
 
     if (mode === 'paid') {
       document.getElementById('modal-title').textContent = course || 'Meld deg på';
-      document.getElementById('modal-sub').textContent = 'Live Zoom-kurs · 4 timer · Maks 12 deltakere. Sikker betaling via Stripe.';
+      document.getElementById('modal-sub').textContent = 'Live Zoom-kurs · 2 timer · Maks 12 deltakere. Sikker betaling via Stripe.';
       document.getElementById('stripe-section').style.display = 'block';
       document.getElementById('stripe-badge').style.display = 'flex';
       document.getElementById('modal-amount-val').textContent = `kr ${currentPrice}`;

@@ -533,6 +533,45 @@
     }
     .btn-ghost:hover { color: var(--text); border-color: var(--text); }
 
+    /* ── DATES / CALENDAR ───────────────────────────── */
+    .dates-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border-m);
+    }
+    .date-card {
+      padding: 3rem; border-right: 1px solid var(--border-m);
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .date-card:last-child { border-right: none; }
+    .date-label {
+      font-family: var(--mono); font-size: 0.62rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    }
+    .date-coming {
+      font-family: var(--display); font-size: 1.8rem;
+      font-weight: 300; color: var(--text); line-height: 1.1;
+      margin-bottom: 0.25rem;
+    }
+    .date-meta {
+      font-size: 0.8rem; color: var(--muted); font-weight: 300;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── GDPR ────────────────────────────────────────── */
+    .gdpr-row {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      margin: 1.2rem 0 1rem;
+    }
+    .gdpr-row input[type="checkbox"] {
+      width: 16px; height: 16px; flex-shrink: 0;
+      margin-top: 0.2rem; accent-color: var(--gold); cursor: pointer;
+    }
+    .gdpr-row label {
+      font-size: 0.78rem; color: var(--muted); font-weight: 300;
+      line-height: 1.5; cursor: pointer;
+    }
+    .gdpr-row label a { color: var(--gold); text-decoration: underline; }
+
     /* ── INSTRUCTOR PHOTO ────────────────────────────── */
     .instructor-row {
       display: flex; align-items: center; gap: 0.85rem;
@@ -548,6 +587,9 @@
 
     /* ── RESPONSIVE ─────────────────────────────────── */
     @media (max-width: 900px) {
+      .dates-grid { grid-template-columns: 1fr; }
+      .date-card { border-right: none; border-bottom: 1px solid var(--border-m); }
+      .date-card:last-child { border-bottom: none; }
       nav { padding: 1.25rem 1.5rem; }
       .hero { padding: 0 1.5rem; }
       .hero-bottom { flex-direction: column; align-items: flex-start; gap: 2rem; }
@@ -661,9 +703,9 @@
       </ul>
       <div class="course-footer">
         <span class="course-price"><sup>kr</sup>799</span>
-        <button class="btn btn-teal" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','V0-kurset','799')">
-          Meld deg på →
-        </button>
+        <a class="btn btn-teal" style="width:auto;padding:0.9rem 1.75rem;display:inline-block;" href="https://buy.stripe.com/3cI14mbaA4vg6jP0ON5AQ00" target="_blank">
+          Kjøp plass →
+        </a>
       </div>
     </div>
 
@@ -690,9 +732,9 @@
       </ul>
       <div class="course-footer">
         <span class="course-price"><sup>kr</sup>799</span>
-        <button class="btn btn-gold" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','Claude-kurset','799')">
-          Meld deg på →
-        </button>
+        <a class="btn btn-gold" style="width:auto;padding:0.9rem 1.75rem;display:inline-block;" href="https://buy.stripe.com/14A28q0vWbXIeQl1SR5AQ01" target="_blank">
+          Kjøp plass →
+        </a>
       </div>
     </div>
 
@@ -733,6 +775,32 @@
   </div><!-- /format-strip -->
 
 </div><!-- /wrap -->
+
+<!-- ═══ DATOER ════════════════════════════════════════════ -->
+<div class="wrap" id="datoer" style="padding-top:0">
+  <p class="section-tag reveal">02 — Kommende kurs</p>
+  <div class="dates-grid reveal">
+
+    <div class="date-card">
+      <span class="date-label">Kurs 01 — V0 by Vercel</span>
+      <span class="date-coming">Dato annonseres snart</span>
+      <span class="date-meta">Live på Zoom · 2 timer · Maks 12 deltakere</span>
+      <a class="btn btn-teal" style="width:auto;padding:0.9rem 1.75rem;display:inline-block;margin-top:0.5rem;" href="https://buy.stripe.com/3cI14mbaA4vg6jP0ON5AQ00" target="_blank">
+        Kjøp plass → kr 799
+      </a>
+    </div>
+
+    <div class="date-card">
+      <span class="date-label">Kurs 02 — Claude av Anthropic</span>
+      <span class="date-coming">Dato annonseres snart</span>
+      <span class="date-meta">Live på Zoom · 2 timer · Maks 12 deltakere</span>
+      <a class="btn btn-gold" style="width:auto;padding:0.9rem 1.75rem;display:inline-block;margin-top:0.5rem;" href="https://buy.stripe.com/14A28q0vWbXIeQl1SR5AQ01" target="_blank">
+        Kjøp plass → kr 799
+      </a>
+    </div>
+
+  </div>
+</div>
 
 <!-- ═══ INNHOLD ══════════════════════════════════════════ -->
 <div class="wrap curr-wrap" style="padding-top:0" id="innhold">
@@ -847,7 +915,11 @@
 <!-- ═══ FOOTER ═══════════════════════════════════════════ -->
 <footer>
   <span class="foot-logo">VIBBEKODE<span>.</span></span>
-  <span class="foot-copy">© 2025 Vibbekode. Alle rettigheter forbeholdt.</span>
+  <span class="foot-copy">© 2026 Vibbekode. Alle rettigheter forbeholdt.</span>
+  <span style="display:flex;gap:1.5rem;">
+    <a href="personvern.html" style="font-size:0.72rem;color:var(--dim);text-decoration:none;">Personvern</a>
+    <a href="salgsvilkar.html" style="font-size:0.72rem;color:var(--dim);text-decoration:none;">Salgsvilkår</a>
+  </span>
 </footer>
 
 <!-- ═══ MODAL ════════════════════════════════════════════ -->
@@ -857,38 +929,24 @@
 
     <!-- FORM STATE -->
     <div class="modal-form" id="modal-form">
-      <h2 id="modal-title">Meld deg på</h2>
-      <p class="modal-sub" id="modal-sub">Fyll inn e-posten din for å sikre plassen din.</p>
+      <h2 id="modal-title">Hold meg oppdatert</h2>
+      <p class="modal-sub" id="modal-sub">Fyll inn e-posten din så gir vi deg beskjed når nye datoer er klare.</p>
 
       <div class="field">
         <label for="email-input">E-postadresse</label>
         <input type="email" id="email-input" placeholder="du@eksempel.no" required />
       </div>
 
-      <!-- BETALT: Stripe-felt -->
-      <div id="stripe-section" style="display:none">
-        <div class="amount-row">
-          <span class="amount-label">Totalbeløp</span>
-          <span class="amount-val" id="modal-amount-val">kr 799</span>
-        </div>
-        <div class="field">
-          <label>Kortinformasjon</label>
-          <div id="card-element"></div>
-          <div id="card-errors" role="alert"></div>
-        </div>
+      <div class="gdpr-row">
+        <input type="checkbox" id="gdpr-check">
+        <label for="gdpr-check">
+          Jeg godtar <a href="salgsvilkar.html" target="_blank">salgsvilkårene</a> og bekrefter at jeg har lest <a href="personvern.html" target="_blank">personvernerklæringen</a>.
+        </label>
       </div>
 
       <button class="btn btn-gold" id="submit-btn" onclick="handleSubmit()" style="margin-top:0.5rem">
-        <span id="btn-text">Bekreft plass</span>
+        <span id="btn-text">Send</span>
       </button>
-
-      <div class="stripe-trust" id="stripe-badge" style="display:none">
-        <svg viewBox="0 0 60 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 11.5C4 8.46 6.46 6 9.5 6h41C53.54 6 56 8.46 56 11.5v2C56 16.54 53.54 19 50.5 19h-41C6.46 19 4 16.54 4 13.5v-2z" fill="#6772E5" opacity="0.15"/>
-          <text x="30" y="15" text-anchor="middle" font-family="sans-serif" font-size="7" fill="#6772E5" opacity="0.7">stripe</text>
-        </svg>
-        <span>Sikker betaling via Stripe</span>
-      </div>
     </div>
 
     <!-- SUCCESS STATE -->
@@ -926,80 +984,15 @@
     document.getElementById(`curr-${tab}`).classList.add('active');
   }
 
-  /* ── Modal state ── */
-  let currentMode = 'free'; // 'free' | 'paid'
-  let currentPrice = '799';
-  let stripe, cardElement;
-
-  /* ─────────────────────────────────────────────────────
-     STRIPE SETUP
-     Bytt ut 'pk_test_XXXX...' med din publiserbare Stripe-nøkkel
-     fra https://dashboard.stripe.com/apikeys
-  ──────────────────────────────────────────────────────── */
-  const STRIPE_PK = 'pk_test_LEGG_TIL_DIN_NØKKEL_HER';
-
-  function initStripe() {
-    if (stripe) return; // allerede initialisert
-    try {
-      stripe = Stripe(STRIPE_PK);
-      const elements = stripe.elements({
-        appearance: {
-          theme: 'night',
-          variables: {
-            colorBackground: '#1c1a16',
-            colorText: '#ede5cc',
-            colorDanger: '#d44f2b',
-            fontFamily: 'DM Sans, sans-serif',
-            borderRadius: '0px',
-            colorPrimary: '#c9952e',
-          }
-        }
-      });
-      cardElement = elements.create('card', {
-        style: {
-          base: {
-            color: '#ede5cc',
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: '15px',
-            '::placeholder': { color: '#3a3830' }
-          },
-          invalid: { color: '#d44f2b' }
-        }
-      });
-      cardElement.mount('#card-element');
-      cardElement.on('change', ({ error }) => {
-        document.getElementById('card-errors').textContent = error ? error.message : '';
-      });
-    } catch(e) {
-      console.warn('Stripe ikke initialisert — legg til din publiserbare nøkkel.');
-    }
-  }
-
-  function openModal(mode, course, price) {
-    currentMode = mode;
-    currentPrice = price || '799';
+  /* ── Modal ── */
+  function openModal() {
     document.getElementById('overlay').classList.add('open');
     document.getElementById('modal-form').classList.remove('hide');
     document.getElementById('modal-success').classList.remove('show');
     document.getElementById('submit-btn').disabled = false;
     document.getElementById('email-input').value = '';
+    document.getElementById('gdpr-check').checked = false;
     document.body.style.overflow = 'hidden';
-
-    if (mode === 'paid') {
-      document.getElementById('modal-title').textContent = course || 'Meld deg på';
-      document.getElementById('modal-sub').textContent = 'Live Zoom-kurs · 2 timer · Maks 12 deltakere. Sikker betaling via Stripe.';
-      document.getElementById('stripe-section').style.display = 'block';
-      document.getElementById('stripe-badge').style.display = 'flex';
-      document.getElementById('modal-amount-val').textContent = `kr ${currentPrice}`;
-      document.getElementById('btn-text').textContent = `Betal kr ${currentPrice}`;
-      initStripe();
-    } else {
-      document.getElementById('modal-title').textContent = 'Venteliste';
-      document.getElementById('modal-sub').textContent = 'Vi sender deg en e-post så snart nye datoer annonseres. Helt gratis.';
-      document.getElementById('stripe-section').style.display = 'none';
-      document.getElementById('stripe-badge').style.display = 'none';
-      document.getElementById('btn-text').textContent = 'Bekreft plass';
-    }
   }
 
   function closeModal() {
@@ -1007,87 +1000,45 @@
     document.body.style.overflow = '';
   }
 
-  // Lukk ved klikk utenfor modal
   document.getElementById('overlay').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
   });
 
   async function handleSubmit() {
     const email = document.getElementById('email-input').value.trim();
+    const gdpr = document.getElementById('gdpr-check');
     const btn = document.getElementById('submit-btn');
     const btnText = document.getElementById('btn-text');
 
     if (!email || !email.includes('@')) {
-      document.getElementById('email-input').focus();
       document.getElementById('email-input').style.borderColor = 'var(--ember)';
       setTimeout(() => { document.getElementById('email-input').style.borderColor = ''; }, 1500);
       return;
     }
+    if (!gdpr.checked) {
+      gdpr.parentElement.style.outline = '1px solid var(--ember)';
+      setTimeout(() => { gdpr.parentElement.style.outline = ''; }, 1500);
+      return;
+    }
 
     btn.disabled = true;
-    btnText.textContent = 'Behandler…';
+    btnText.textContent = 'Sender…';
 
-    if (currentMode === 'paid') {
-      /* ── Stripe betalingsflyt ── */
-      if (!stripe || !cardElement) {
-        // Demo-modus: simuler suksess hvis Stripe ikke er satt opp
-        await fakeDelay(1200);
-        showSuccess(true);
-        return;
-      }
-
-      const { paymentMethod, error } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: { email }
+    /* Send til Formspree – bytt ut koden når du har satt opp formspree.io */
+    try {
+      await fetch('https://formspree.io/f/DIN_KODE_HER', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email })
       });
+    } catch(e) { /* vis suksess uansett */ }
 
-      if (error) {
-        document.getElementById('card-errors').textContent = error.message;
-        btn.disabled = false;
-        btnText.textContent = `Betal kr ${currentPrice}`;
-        return;
-      }
-
-      /* ─────────────────────────────────────────────────
-         Send paymentMethod.id og email til din backend her.
-         Eksempel:
-         await fetch('/api/checkout', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ paymentMethodId: paymentMethod.id, email })
-         });
-      ──────────────────────────────────────────────────── */
-      console.log('PaymentMethod opprettet:', paymentMethod.id, 'E-post:', email);
-      await fakeDelay(800);
-      showSuccess(true);
-
-    } else {
-      /* ── Venteliste ── */
-      /* Send email til din backend eller e-postleverandør her */
-      console.log('Venteliste-registrering:', email);
-      await fakeDelay(900);
-      showSuccess(false);
-    }
-  }
-
-  function showSuccess(isPaid) {
     document.getElementById('modal-form').classList.add('hide');
     const s = document.getElementById('modal-success');
     s.classList.add('show');
-    if (isPaid) {
-      document.getElementById('success-title').textContent = 'Betaling bekreftet!';
-      document.getElementById('success-msg').textContent =
-        'Velkommen til Vibbekode! Du har nå full tilgang. Sjekk e-posten din for neste steg.';
-    } else {
-      document.getElementById('success-title').textContent = 'Du er på lista!';
-      document.getElementById('success-msg').textContent =
-        'Vi sender deg en e-post så snart kurset åpner. Gleder oss til å ha deg med!';
-    }
-  }
-
-  function fakeDelay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    document.getElementById('success-title').textContent = 'Du er på lista!';
+    document.getElementById('success-msg').textContent =
+      'Vi sender deg en e-post så snart nye datoer er klare. Gleder oss til å ha deg med!';
   }
 </script>
 </body>

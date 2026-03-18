@@ -660,8 +660,8 @@
         <li>Bygge en ferdig landingsside fra scratch</li>
       </ul>
       <div class="course-footer">
-        <span class="course-price"><sup>kr</sup>1 490</span>
-        <button class="btn btn-teal" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','V0-kurset','1 490')">
+        <span class="course-price"><sup>kr</sup>799</span>
+        <button class="btn btn-teal" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','V0-kurset','799')">
           Meld deg på →
         </button>
       </div>
@@ -689,8 +689,8 @@
         <li>Avanserte bruksområder og API-muligheter</li>
       </ul>
       <div class="course-footer">
-        <span class="course-price"><sup>kr</sup>1 490</span>
-        <button class="btn btn-gold" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','Claude-kurset','1 490')">
+        <span class="course-price"><sup>kr</sup>799</span>
+        <button class="btn btn-gold" style="width:auto;padding:0.9rem 1.75rem;" onclick="openModal('paid','Claude-kurset','799')">
           Meld deg på →
         </button>
       </div>
@@ -869,7 +869,7 @@
       <div id="stripe-section" style="display:none">
         <div class="amount-row">
           <span class="amount-label">Totalbeløp</span>
-          <span class="amount-val" id="modal-amount-val">kr 1 490</span>
+          <span class="amount-val" id="modal-amount-val">kr 799</span>
         </div>
         <div class="field">
           <label>Kortinformasjon</label>
@@ -928,7 +928,7 @@
 
   /* ── Modal state ── */
   let currentMode = 'free'; // 'free' | 'paid'
-  let currentPrice = '1 490';
+  let currentPrice = '799';
   let stripe, cardElement;
 
   /* ─────────────────────────────────────────────────────
@@ -977,7 +977,7 @@
 
   function openModal(mode, course, price) {
     currentMode = mode;
-    currentPrice = price || '1 490';
+    currentPrice = price || '799';
     document.getElementById('overlay').classList.add('open');
     document.getElementById('modal-form').classList.remove('hide');
     document.getElementById('modal-success').classList.remove('show');
